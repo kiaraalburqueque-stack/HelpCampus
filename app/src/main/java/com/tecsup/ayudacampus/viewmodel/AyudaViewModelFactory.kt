@@ -21,6 +21,9 @@ class AyudaViewModelFactory(
     override fun <T : ViewModel> create(modelClass: Class<T>): T = when {
         modelClass.isAssignableFrom(CategoriasViewModel::class.java) -> CategoriasViewModel(repo)
         modelClass.isAssignableFrom(SesionViewModel::class.java) -> SesionViewModel(repo, prefs)
+        modelClass.isAssignableFrom(MisTicketsViewModel::class.java) -> MisTicketsViewModel(repo, usuarioId())
         else -> throw IllegalArgumentException("ViewModel desconocido: ${modelClass.name}")
     } as T
+
+    private fun usuarioId(): Int = requireNotNull(usuario) { "Este ViewModel necesita un usuario" }.id
 }

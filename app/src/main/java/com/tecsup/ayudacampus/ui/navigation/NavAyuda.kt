@@ -36,11 +36,13 @@ import androidx.navigation.navArgument
 import com.tecsup.ayudacampus.AyudaApp
 import com.tecsup.ayudacampus.model.Rol
 import com.tecsup.ayudacampus.ui.cliente.LoginScreen
+import com.tecsup.ayudacampus.ui.cliente.MisTicketsScreen
 import com.tecsup.ayudacampus.ui.cliente.SplashScreen
 import com.tecsup.ayudacampus.ui.soporte.CategoriasScreen
 import com.tecsup.ayudacampus.ui.theme.AyudaTheme
 import com.tecsup.ayudacampus.viewmodel.AyudaViewModelFactory
 import com.tecsup.ayudacampus.viewmodel.CategoriasViewModel
+import com.tecsup.ayudacampus.viewmodel.MisTicketsViewModel
 import com.tecsup.ayudacampus.viewmodel.SesionViewModel
 
 /** Un item de la barra inferior. 'tambien' marca el item como activo en rutas hijas. */
@@ -135,7 +137,15 @@ fun NavAyuda(app: AyudaApp) {
                 // ================= Grafo del estudiante =================
                 navigation(startDestination = Rutas.MIS_TICKETS, route = Rutas.GRAFO_CLIENTE) {
                     composable(Rutas.MIS_TICKETS) {
-                        Pendiente("Mis tickets (Paso 7)")
+                        usuario?.let { u ->
+                            val vm: MisTicketsViewModel = viewModel(factory = AyudaViewModelFactory(repo, prefs, u))
+                            MisTicketsScreen(
+                                vm = vm,
+                                nombre = u.nombre,
+                                onAbrir = { id -> nav.navigate(Rutas.detalle(id)) },
+                                onNuevo = { irATab(nav, Rutas.NUEVO_TICKET, Rutas.MIS_TICKETS) }
+                            )
+                        }
                     }
                     composable(Rutas.NUEVO_TICKET) {
                         Pendiente("Nuevo ticket (Paso 8)")
