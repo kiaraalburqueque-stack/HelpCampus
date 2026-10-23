@@ -21,7 +21,11 @@ class AyudaApp : Application() {
     val database: AyudaDatabase by lazy { AyudaDatabase.obtener(this) }
 
     val repository: AyudaRepository by lazy {
-        AyudaRepositoryRoom(database.categoriaDao())
+        AyudaRepositoryRoom(
+            database.categoriaDao(),
+            database.usuarioDao(),
+            database.ticketDao()
+        )
     }
 
     override fun onCreate() {
