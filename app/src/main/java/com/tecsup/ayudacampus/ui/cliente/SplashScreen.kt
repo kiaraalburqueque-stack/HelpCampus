@@ -16,18 +16,38 @@ import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material.icons.outlined.Computer
 import androidx.compose.material.icons.outlined.Print
 import androidx.compose.material.icons.outlined.Wifi
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.tecsup.ayudacampus.model.Rol
 import com.tecsup.ayudacampus.ui.components.AyudaButton
+import com.tecsup.ayudacampus.viewmodel.EstadoInicio
+import kotlinx.coroutines.delay
 
+/**
+ * Pantalla de bienvenida. Si ya hay un perfil guardado en DataStore,
+ * salta el login y va directo a la pantalla principal de ese perfil.
+ */
 @Composable
-fun SplashScreen(onComenzar: () -> Unit) {
+fun SplashScreen(
+    inicio: EstadoInicio,
+    onComenzar: () -> Unit,
+    onSesionActiva: (Rol) -> Unit
+) {
+    LaunchedEffect(inicio) {
+        val estado = inicio
+        if (estado is EstadoInicio.ConSesion) {
+            delay(700)
+            onSesionActiva(estado.rol)
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -62,7 +82,11 @@ fun SplashScreen(onComenzar: () -> Unit) {
             IconoSplash(Icons.Outlined.Print)
         }
         Spacer(Modifier.weight(1f))
-        AyudaButton(texto = "Comenzar", onClick = onComenzar)
+        if (inicio is EstadoInicio.SinSesion) {
+            AyudaButton(texto = "Comenzar", onClick = onComenzar)
+        } else {
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+        }
         Spacer(Modifier.height(8.dp))
         Text(
             "Mesa de ayuda TI · Tecsup",
