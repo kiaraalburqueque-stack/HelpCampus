@@ -10,7 +10,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
-/** Crea una sola base de datos y un solo repository para toda la app. */
+/**
+ * Registrada en el AndroidManifest (android:name=".AyudaApp").
+ * Crea una sola base de datos y un solo repository para toda la app.
+ */
 class AyudaApp : Application() {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -23,6 +26,7 @@ class AyudaApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        // Siembra los datos de prueba en segundo plano (solo la primera vez).
         scope.launch { DatosIniciales.sembrar(database) }
     }
 }
