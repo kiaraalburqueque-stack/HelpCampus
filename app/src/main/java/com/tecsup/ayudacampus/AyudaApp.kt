@@ -3,6 +3,7 @@ package com.tecsup.ayudacampus
 import android.app.Application
 import com.tecsup.ayudacampus.data.local.AyudaDatabase
 import com.tecsup.ayudacampus.data.local.DatosIniciales
+import com.tecsup.ayudacampus.data.prefs.PreferenciasStore
 import com.tecsup.ayudacampus.data.repository.AyudaRepository
 import com.tecsup.ayudacampus.data.repository.AyudaRepositoryRoom
 import kotlinx.coroutines.CoroutineScope
@@ -27,6 +28,8 @@ class AyudaApp : Application() {
             database.ticketDao()
         )
     }
+
+    val preferencias: PreferenciasStore by lazy { PreferenciasStore(this) }
 
     override fun onCreate() {
         super.onCreate()
