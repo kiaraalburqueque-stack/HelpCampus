@@ -3,6 +3,9 @@ package com.tecsup.ayudacampus.ui.navigation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.BarChart
@@ -35,6 +38,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.tecsup.ayudacampus.AyudaApp
 import com.tecsup.ayudacampus.model.Rol
+import com.tecsup.ayudacampus.ui.cliente.DetalleTicketScreen
 import com.tecsup.ayudacampus.ui.cliente.LoginScreen
 import com.tecsup.ayudacampus.ui.cliente.MisTicketsScreen
 import com.tecsup.ayudacampus.ui.cliente.NuevoTicketScreen
@@ -46,6 +50,7 @@ import com.tecsup.ayudacampus.viewmodel.CategoriasViewModel
 import com.tecsup.ayudacampus.viewmodel.MisTicketsViewModel
 import com.tecsup.ayudacampus.viewmodel.NuevoTicketViewModel
 import com.tecsup.ayudacampus.viewmodel.SesionViewModel
+import com.tecsup.ayudacampus.viewmodel.TicketDetalleViewModel
 
 /** Un item de la barra inferior. 'tambien' marca el item como activo en rutas hijas. */
 private data class ItemBarra(
@@ -71,6 +76,7 @@ private val ITEMS_SOPORTE = listOf(
 private val RUTAS_BARRA_CLIENTE = ITEMS_CLIENTE.flatMap { it.tambien + it.ruta }.toSet()
 private val RUTAS_BARRA_SOPORTE = ITEMS_SOPORTE.flatMap { it.tambien + it.ruta }.toSet()
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun NavAyuda(app: AyudaApp) {
     val repo = app.repository
@@ -121,6 +127,8 @@ fun NavAyuda(app: AyudaApp) {
                 modifier = Modifier
                     .padding(padding)
                     .fillMaxSize()
+                    .consumeWindowInsets(padding)
+                    .imePadding() // el teclado no tapa el campo de comentarios
             ) {
                 composable(Rutas.SPLASH) {
                     SplashScreen(
@@ -163,8 +171,14 @@ fun NavAyuda(app: AyudaApp) {
                     composable(
                         Rutas.DETALLE,
                         arguments = listOf(navArgument("ticketId") { type = NavType.IntType })
-                    ) {
-                        Pendiente("Detalle (Paso 9)")
+                    ) { entrada ->
+                        val ticketId = entrada.arguments?.getInt("ticketId") ?: 0
+                        usuario?.let { u ->
+                            val vm: TicketDetalleViewModel = viewModel(
+                                factory = AyudaViewModelFactory(repo, prefs, u, ticketId)
+                            )
+                            DetalleTicketScreen(vm = vm, usuarioId = u.id, onBack = { nav.popBackStack() })
+                        }
                     }
                     composable(Rutas.PERFIL) {
                         Pendiente("Perfil (Paso 12)")

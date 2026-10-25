@@ -23,6 +23,8 @@ class AyudaViewModelFactory(
         modelClass.isAssignableFrom(SesionViewModel::class.java) -> SesionViewModel(repo, prefs)
         modelClass.isAssignableFrom(MisTicketsViewModel::class.java) -> MisTicketsViewModel(repo, usuarioId())
         modelClass.isAssignableFrom(NuevoTicketViewModel::class.java) -> NuevoTicketViewModel(repo, prefs, usuarioId())
+        modelClass.isAssignableFrom(TicketDetalleViewModel::class.java) ->
+            TicketDetalleViewModel(repo, ticketId, requireNotNull(usuario))
         else -> throw IllegalArgumentException("ViewModel desconocido: ${modelClass.name}")
     } as T
 
