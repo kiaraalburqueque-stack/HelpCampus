@@ -102,6 +102,19 @@ com.tecsup.ayudacampus
 | Alerta: tickets ALTA y ABIERTO con más de 1 hora | PanelViewModel |
 | No se elimina una categoría que ya tiene tickets | CategoriasViewModel |
 
+## Fase 2 — Mejoras con IA (rama `mejora-ia`)
+
+| Mejora | Qué hace | Capas |
+|---|---|---|
+| Indicadores de calidad | Tiempo promedio de resolución (`AVG(fechaCierre - fecha)`) y satisfacción promedio en el panel | DAO + Repository + ViewModel + View |
+| Contador de SLA | Cada ticket muestra cuánto tiempo le queda según su prioridad (Alta 4 h, Media 24 h, Baja 72 h), con una barra verde → ámbar → rojo que se actualiza cada minuto | ViewModel + View |
+| Búsqueda avanzada | Soporte combina estado, varias prioridades, categoría y texto (título, número, cliente, lugar, descripción) | ViewModel + View |
+| Sugerencia inteligente | Al escribir el ticket, un asistente sin internet sugiere la categoría y la prioridad, y explica qué palabras detectó | ViewModel + View |
+| Registro de estudiante | Pantalla para crear una cuenta con validaciones (correo único, contraseña y confirmación). Al terminar vuelve al Login con el correo listo para iniciar sesión | DAO + Repository + ViewModel + View |
+| Animaciones | Transiciones, listas animadas, contadores, gráficos que crecen, estrellas con rebote y estados vacíos ilustrados con Canvas | View |
+
+Los prompts usados y lo que se corrigió están en [PROMPTS.md](PROMPTS.md).
+
 ## Capturas
 
 | Estudiante | | |
