@@ -72,7 +72,7 @@ class SesionViewModel(
         }
         viewModelScope.launch {
             _cargando.value = true
-            val usuario = repo.login(correo.trim(), clave)
+            val usuario = repo.login(correo.trim().lowercase(), clave)
             when {
                 usuario == null ->
                     _error.value = "Correo o contraseña incorrectos"

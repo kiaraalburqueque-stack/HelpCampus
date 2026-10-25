@@ -33,6 +33,15 @@ class AyudaRepositoryRoom(
 
     override suspend fun obtenerUsuarioPorRol(rol: Rol): Usuario? = usuarioDao.obtenerPorRol(rol.name)
 
+    override suspend fun existeCorreo(correo: String): Boolean = usuarioDao.contarPorCorreo(correo) > 0
+
+    /** Toda cuenta nueva es de Estudiante (CLIENTE); las de Soporte no se crean desde la app. */
+    override suspend fun registrarEstudiante(nombre: String, correo: String, clave: String): Usuario {
+        val nuevo = Usuario(nombre = nombre, correo = correo, clave = clave, rol = Rol.CLIENTE.name)
+        val id = usuarioDao.insertar(nuevo)
+        return nuevo.copy(id = id.toInt())
+    }
+
     // ---------- Categorias (ejemplo resuelto) ----------
     override fun observarCategorias(): Flow<List<Categoria>> = categoriaDao.observarTodas()
 

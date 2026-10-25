@@ -46,6 +46,7 @@ import com.tecsup.ayudacampus.ui.cliente.LoginScreen
 import com.tecsup.ayudacampus.ui.cliente.MisTicketsScreen
 import com.tecsup.ayudacampus.ui.cliente.NuevoTicketScreen
 import com.tecsup.ayudacampus.ui.cliente.PerfilScreen
+import com.tecsup.ayudacampus.ui.cliente.RegistroScreen
 import com.tecsup.ayudacampus.ui.cliente.SplashScreen
 import com.tecsup.ayudacampus.ui.soporte.AjustesScreen
 import com.tecsup.ayudacampus.ui.soporte.AtenderTicketScreen
@@ -61,6 +62,7 @@ import com.tecsup.ayudacampus.viewmodel.CategoriasViewModel
 import com.tecsup.ayudacampus.viewmodel.MisTicketsViewModel
 import com.tecsup.ayudacampus.viewmodel.NuevoTicketViewModel
 import com.tecsup.ayudacampus.viewmodel.PanelViewModel
+import com.tecsup.ayudacampus.viewmodel.RegistroViewModel
 import com.tecsup.ayudacampus.viewmodel.SesionViewModel
 import com.tecsup.ayudacampus.viewmodel.TicketDetalleViewModel
 
@@ -84,6 +86,9 @@ private val ITEMS_SOPORTE = listOf(
     ItemBarra(Rutas.CATEGORIAS, "Categorías", Icons.Outlined.LocalOffer),
     ItemBarra(Rutas.AJUSTES, "Ajustes", Icons.Outlined.Settings)
 )
+
+/** Clave para pasar el correo recien registrado del Registro al Login. */
+private const val CLAVE_CORREO_REGISTRADO = "correoRegistrado"
 
 private val RUTAS_BARRA_CLIENTE = ITEMS_CLIENTE.flatMap { it.tambien + it.ruta }.toSet()
 private val RUTAS_BARRA_SOPORTE = ITEMS_SOPORTE.flatMap { it.tambien + it.ruta }.toSet()
@@ -170,8 +175,32 @@ fun NavAyuda(app: AyudaApp) {
                     )
                 }
 
-                composable(Rutas.LOGIN) {
-                    LoginScreen(vm = sesionVm, onIngreso = { irAlGrafo(it) })
+                composable(Rutas.LOGIN) { backStack ->
+                    // El registro deja aqui el correo de la cuenta nueva (SavedStateHandle de la entrada).
+                    val correoRegistrado by backStack.savedStateHandle
+                        .getStateFlow<String?>(CLAVE_CORREO_REGISTRADO, null)
+                        .collectAsState()
+                    LoginScreen(
+                        vm = sesionVm,
+                        onIngreso = { irAlGrafo(it) },
+                        onRegistrarse = { nav.navigate(Rutas.REGISTRO) },
+                        correoRegistrado = correoRegistrado,
+                        onCorreoUsado = { backStack.savedStateHandle[CLAVE_CORREO_REGISTRADO] = null }
+                    )
+                }
+
+                // Fase 2: registro de estudiante. Como en una app real, despues de crear la cuenta
+                // se vuelve al Login para iniciar sesion con el correo y la contrasena nuevos.
+                composable(Rutas.REGISTRO) {
+                    val vm: RegistroViewModel = viewModel(factory = factory)
+                    RegistroScreen(
+                        vm = vm,
+                        onBack = { nav.popBackStack() },
+                        onRegistrado = { nuevo ->
+                            nav.previousBackStackEntry?.savedStateHandle?.set(CLAVE_CORREO_REGISTRADO, nuevo.correo)
+                            nav.popBackStack()
+                        }
+                    )
                 }
 
                 // ================= Grafo del estudiante =================

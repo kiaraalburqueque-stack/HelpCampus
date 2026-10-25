@@ -11,12 +11,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -36,6 +39,7 @@ import com.tecsup.ayudacampus.model.Rol
 import com.tecsup.ayudacampus.ui.components.AyudaButton
 import com.tecsup.ayudacampus.ui.components.AyudaTextField
 import com.tecsup.ayudacampus.ui.theme.AyudaTheme
+import com.tecsup.ayudacampus.ui.theme.ColorResuelto
 import com.tecsup.ayudacampus.viewmodel.SesionViewModel
 
 /**
@@ -43,15 +47,34 @@ import com.tecsup.ayudacampus.viewmodel.SesionViewModel
  * (cian o violeta), por eso el boton 'Ingresar' toma el color del rol elegido.
  */
 @Composable
-fun LoginScreen(vm: SesionViewModel, onIngreso: (Rol) -> Unit) {
+fun LoginScreen(
+    vm: SesionViewModel,
+    onIngreso: (Rol) -> Unit,
+    onRegistrarse: () -> Unit = {},
+    correoRegistrado: String? = null,
+    onCorreoUsado: () -> Unit = {}
+) {
     var rol by rememberSaveable { mutableStateOf(Rol.CLIENTE) }
     var correo by rememberSaveable { mutableStateOf("") }
     var clave by rememberSaveable { mutableStateOf("") }
+    var cuentaCreada by rememberSaveable { mutableStateOf(false) }
 
     val usuario by vm.usuarioActual.collectAsState()
     val error by vm.error.collectAsState()
     val cargando by vm.cargando.collectAsState()
     val oscuro by vm.modoOscuro.collectAsState()
+
+    // Si venimos del registro: pestana Estudiante, correo ya escrito y aviso de cuenta creada.
+    LaunchedEffect(correoRegistrado) {
+        if (correoRegistrado != null) {
+            rol = Rol.CLIENTE
+            correo = correoRegistrado
+            clave = ""
+            cuentaCreada = true
+            vm.limpiarError()
+            onCorreoUsado()
+        }
+    }
 
     // Cuando el ViewModel confirma el usuario, navegamos a su pantalla principal.
     LaunchedEffect(usuario) {
@@ -75,10 +98,30 @@ fun LoginScreen(vm: SesionViewModel, onIngreso: (Rol) -> Unit) {
                 )
                 Spacer(Modifier.height(24.dp))
 
+                if (cuentaCreada) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(ColorResuelto.copy(alpha = 0.12f), RoundedCornerShape(12.dp))
+                            .padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(Icons.Outlined.CheckCircle, contentDescription = null, tint = ColorResuelto)
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            "Cuenta creada. Ahora inicia sesión con tu correo y contraseña.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                    Spacer(Modifier.height(16.dp))
+                }
+
                 SelectorRol(
                     seleccionado = rol,
                     onCambio = {
                         rol = it
+                        cuentaCreada = false
                         vm.limpiarError()
                     }
                 )
@@ -134,7 +177,8 @@ fun LoginScreen(vm: SesionViewModel, onIngreso: (Rol) -> Unit) {
                         Text(
                             "Regístrate",
                             style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.clickable(onClick = onRegistrarse)
                         )
                     }
                 } else {
