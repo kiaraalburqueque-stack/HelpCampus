@@ -37,12 +37,14 @@ import com.tecsup.ayudacampus.AyudaApp
 import com.tecsup.ayudacampus.model.Rol
 import com.tecsup.ayudacampus.ui.cliente.LoginScreen
 import com.tecsup.ayudacampus.ui.cliente.MisTicketsScreen
+import com.tecsup.ayudacampus.ui.cliente.NuevoTicketScreen
 import com.tecsup.ayudacampus.ui.cliente.SplashScreen
 import com.tecsup.ayudacampus.ui.soporte.CategoriasScreen
 import com.tecsup.ayudacampus.ui.theme.AyudaTheme
 import com.tecsup.ayudacampus.viewmodel.AyudaViewModelFactory
 import com.tecsup.ayudacampus.viewmodel.CategoriasViewModel
 import com.tecsup.ayudacampus.viewmodel.MisTicketsViewModel
+import com.tecsup.ayudacampus.viewmodel.NuevoTicketViewModel
 import com.tecsup.ayudacampus.viewmodel.SesionViewModel
 
 /** Un item de la barra inferior. 'tambien' marca el item como activo en rutas hijas. */
@@ -148,7 +150,15 @@ fun NavAyuda(app: AyudaApp) {
                         }
                     }
                     composable(Rutas.NUEVO_TICKET) {
-                        Pendiente("Nuevo ticket (Paso 8)")
+                        usuario?.let { u ->
+                            val vm: NuevoTicketViewModel = viewModel(factory = AyudaViewModelFactory(repo, prefs, u))
+                            NuevoTicketScreen(
+                                vm = vm,
+                                onBack = { irATab(nav, Rutas.MIS_TICKETS, Rutas.MIS_TICKETS) },
+                                // al enviar volvemos a Mis tickets: el nuevo aparece arriba (orden fecha DESC)
+                                onEnviado = { irATab(nav, Rutas.MIS_TICKETS, Rutas.MIS_TICKETS) }
+                            )
+                        }
                     }
                     composable(
                         Rutas.DETALLE,
