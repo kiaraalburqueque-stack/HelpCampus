@@ -26,3 +26,13 @@ fun horaComentario(millis: Long, ahora: Long = System.currentTimeMillis()): Stri
     } else {
         tiempoRelativo(millis, ahora).lowercase()
     }
+
+/** "Kiara Alburqueque" -> "Kiara A." */
+fun nombreCorto(nombre: String): String {
+    val partes = nombre.trim().split(" ").filter { it.isNotBlank() }
+    return when {
+        partes.isEmpty() -> ""
+        partes.size == 1 -> partes[0]
+        else -> "${partes[0]} ${partes[1].first()}."
+    }
+}

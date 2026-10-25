@@ -43,12 +43,16 @@ import com.tecsup.ayudacampus.ui.cliente.LoginScreen
 import com.tecsup.ayudacampus.ui.cliente.MisTicketsScreen
 import com.tecsup.ayudacampus.ui.cliente.NuevoTicketScreen
 import com.tecsup.ayudacampus.ui.cliente.SplashScreen
+import com.tecsup.ayudacampus.ui.soporte.BandejaScreen
 import com.tecsup.ayudacampus.ui.soporte.CategoriasScreen
+import com.tecsup.ayudacampus.ui.soporte.PanelScreen
 import com.tecsup.ayudacampus.ui.theme.AyudaTheme
 import com.tecsup.ayudacampus.viewmodel.AyudaViewModelFactory
+import com.tecsup.ayudacampus.viewmodel.BandejaViewModel
 import com.tecsup.ayudacampus.viewmodel.CategoriasViewModel
 import com.tecsup.ayudacampus.viewmodel.MisTicketsViewModel
 import com.tecsup.ayudacampus.viewmodel.NuevoTicketViewModel
+import com.tecsup.ayudacampus.viewmodel.PanelViewModel
 import com.tecsup.ayudacampus.viewmodel.SesionViewModel
 import com.tecsup.ayudacampus.viewmodel.TicketDetalleViewModel
 
@@ -188,10 +192,12 @@ fun NavAyuda(app: AyudaApp) {
                 // ================= Grafo de soporte =================
                 navigation(startDestination = Rutas.PANEL, route = Rutas.GRAFO_SOPORTE) {
                     composable(Rutas.PANEL) {
-                        Pendiente("Panel (Paso 10)")
+                        val vm: PanelViewModel = viewModel(factory = factory)
+                        PanelScreen(vm = vm, onVerAltas = { irATab(nav, Rutas.BANDEJA, Rutas.PANEL) })
                     }
                     composable(Rutas.BANDEJA) {
-                        Pendiente("Bandeja (Paso 10)")
+                        val vm: BandejaViewModel = viewModel(factory = factory)
+                        BandejaScreen(vm = vm, onAtender = { id -> nav.navigate(Rutas.atender(id)) })
                     }
                     composable(
                         Rutas.ATENDER,

@@ -21,6 +21,8 @@ class AyudaViewModelFactory(
     override fun <T : ViewModel> create(modelClass: Class<T>): T = when {
         modelClass.isAssignableFrom(CategoriasViewModel::class.java) -> CategoriasViewModel(repo)
         modelClass.isAssignableFrom(SesionViewModel::class.java) -> SesionViewModel(repo, prefs)
+        modelClass.isAssignableFrom(PanelViewModel::class.java) -> PanelViewModel(repo)
+        modelClass.isAssignableFrom(BandejaViewModel::class.java) -> BandejaViewModel(repo)
         modelClass.isAssignableFrom(MisTicketsViewModel::class.java) -> MisTicketsViewModel(repo, usuarioId())
         modelClass.isAssignableFrom(NuevoTicketViewModel::class.java) -> NuevoTicketViewModel(repo, prefs, usuarioId())
         modelClass.isAssignableFrom(TicketDetalleViewModel::class.java) ->
