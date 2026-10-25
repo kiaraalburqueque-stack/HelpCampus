@@ -1,5 +1,10 @@
 package com.tecsup.ayudacampus.ui.cliente
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -21,6 +26,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material.icons.outlined.Schedule
@@ -30,6 +36,7 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -45,6 +52,8 @@ import com.tecsup.ayudacampus.ui.components.EstadoVacio
 import com.tecsup.ayudacampus.ui.components.iconoCategoria
 import com.tecsup.ayudacampus.ui.theme.colorPrioridad
 import com.tecsup.ayudacampus.viewmodel.NuevoTicketViewModel
+import com.tecsup.ayudacampus.viewmodel.Sugerencia
+import com.tecsup.ayudacampus.viewmodel.horasSla
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -56,6 +65,7 @@ fun NuevoTicketScreen(
     val form by vm.form.collectAsState()
     val categorias by vm.categorias.collectAsState()
     val recibirTickets by vm.recibirTickets.collectAsState()
+    val sugerencia by vm.sugerencia.collectAsState()
 
     Column(modifier = Modifier.fillMaxSize()) {
         AppTopBar(titulo = "Nuevo ticket", onBack = onBack)
@@ -123,6 +133,15 @@ fun NuevoTicketScreen(
                 error = form.errorDescripcion
             )
 
+            // Fase 2: el asistente sugiere categoria y prioridad mientras el estudiante escribe.
+            AnimatedVisibility(
+                visible = sugerencia != null,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut()
+            ) {
+                sugerencia?.let { TarjetaSugerencia(it, onAplicar = vm::aplicarSugerencia) }
+            }
+
             Spacer(Modifier.height(8.dp))
             Row(
                 modifier = Modifier
@@ -151,10 +170,49 @@ fun NuevoTicketScreen(
     }
 }
 
-private fun horasRespuesta(p: Prioridad): Int = when (p) {
-    Prioridad.ALTA -> 4
-    Prioridad.MEDIA -> 24
-    Prioridad.BAJA -> 72
+private fun horasRespuesta(p: Prioridad): Int = horasSla(p)
+
+/** Tarjeta del asistente: que sugiere, por que (palabras detectadas) y boton Aplicar. */
+@Composable
+private fun TarjetaSugerencia(s: Sugerencia, onAplicar: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp)
+            .background(MaterialTheme.colorScheme.secondaryContainer, RoundedCornerShape(12.dp))
+            .padding(12.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                Icons.Outlined.AutoAwesome,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                modifier = Modifier.size(18.dp)
+            )
+            Spacer(Modifier.width(6.dp))
+            Text(
+                "Sugerencia del asistente",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+        }
+        Spacer(Modifier.height(4.dp))
+        Text(
+            listOfNotNull(s.categoria?.nombre, s.prioridad?.let { "Prioridad ${it.etiqueta}" }).joinToString(" · "),
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSecondaryContainer
+        )
+        if (s.pistas.isNotEmpty()) {
+            Text(
+                "Detecté: " + s.pistas.joinToString(", ") { "«$it»" },
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f)
+            )
+        }
+        TextButton(onClick = onAplicar, modifier = Modifier.align(Alignment.End)) {
+            Text("Aplicar", color = MaterialTheme.colorScheme.onSecondaryContainer)
+        }
+    }
 }
 
 /** Tres botones Baja / Media / Alta; el elegido se pinta con el color de la prioridad. */

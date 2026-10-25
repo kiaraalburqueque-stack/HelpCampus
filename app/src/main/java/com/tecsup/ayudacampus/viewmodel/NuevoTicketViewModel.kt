@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -43,6 +44,29 @@ class NuevoTicketViewModel(
 
     private val _form = MutableStateFlow(FormularioTicket())
     val form: StateFlow<FormularioTicket> = _form.asStateFlow()
+
+    /**
+     * Fase 2: sugerencia inteligente. Se recalcula sola cuando cambia el formulario.
+     * Solo se muestra si propone algo distinto de lo que el estudiante ya eligio.
+     */
+    val sugerencia: StateFlow<Sugerencia?> = combine(_form, categorias) { f, cats ->
+        AsistenteTicket.analizar(f.titulo, f.descripcion, cats)?.takeIf { s ->
+            (s.categoria != null && s.categoria.id != f.categoriaId) ||
+                (s.prioridad != null && s.prioridad != f.prioridad)
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    /** Aplica lo sugerido (el estudiante siempre decide: es un boton, no un cambio automatico). */
+    fun aplicarSugerencia() {
+        val s = sugerencia.value ?: return
+        _form.update {
+            it.copy(
+                categoriaId = s.categoria?.id ?: it.categoriaId,
+                prioridad = s.prioridad ?: it.prioridad,
+                errorCategoria = if (s.categoria != null) null else it.errorCategoria
+            )
+        }
+    }
 
     // Al escribir en un campo se borra su error.
     fun elegirCategoria(id: Int) = _form.update { it.copy(categoriaId = id, errorCategoria = null) }
