@@ -67,4 +67,10 @@ class PanelViewModel(repo: AyudaRepository) : ViewModel() {
         repo.observarAltasSinAtender(System.currentTimeMillis() - 60 * 60 * 1000L),
         0
     )
+
+    /** Fase 2: cuanto tarda en promedio resolverse un ticket (fechaCierre - fecha), en millis. */
+    val tiempoPromedio: StateFlow<Long?> = estado(repo.observarTiempoPromedioResolucion(), null)
+
+    /** Fase 2: promedio de estrellas que dieron los estudiantes al cerrar. */
+    val satisfaccion: StateFlow<Double?> = estado(repo.observarSatisfaccionPromedio(), null)
 }
