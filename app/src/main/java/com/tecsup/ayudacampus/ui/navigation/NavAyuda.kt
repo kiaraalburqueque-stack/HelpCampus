@@ -1,6 +1,5 @@
 package com.tecsup.ayudacampus.ui.navigation
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -24,7 +23,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -42,7 +40,9 @@ import com.tecsup.ayudacampus.ui.cliente.DetalleTicketScreen
 import com.tecsup.ayudacampus.ui.cliente.LoginScreen
 import com.tecsup.ayudacampus.ui.cliente.MisTicketsScreen
 import com.tecsup.ayudacampus.ui.cliente.NuevoTicketScreen
+import com.tecsup.ayudacampus.ui.cliente.PerfilScreen
 import com.tecsup.ayudacampus.ui.cliente.SplashScreen
+import com.tecsup.ayudacampus.ui.soporte.AjustesScreen
 import com.tecsup.ayudacampus.ui.soporte.AtenderTicketScreen
 import com.tecsup.ayudacampus.ui.soporte.BandejaScreen
 import com.tecsup.ayudacampus.ui.soporte.CategoriasScreen
@@ -107,6 +107,19 @@ fun NavAyuda(app: AyudaApp) {
     fun irAlGrafo(r: Rol) {
         val destino = if (r == Rol.CLIENTE) Rutas.GRAFO_CLIENTE else Rutas.GRAFO_SOPORTE
         nav.navigate(destino) {
+            popUpTo(nav.graph.id) { inclusive = true }
+        }
+    }
+
+    /** Cambio de perfil (modo practica): guarda el otro perfil y salta a su grafo. */
+    fun cambiarPerfil() {
+        sesionVm.cambiarPerfil { nuevoRol -> irAlGrafo(nuevoRol) }
+    }
+
+    /** Cierra sesion y vuelve al Login limpiando la pila. */
+    fun cerrarSesion() {
+        sesionVm.cerrarSesion()
+        nav.navigate(Rutas.LOGIN) {
             popUpTo(nav.graph.id) { inclusive = true }
         }
     }
@@ -178,8 +191,8 @@ fun NavAyuda(app: AyudaApp) {
                     composable(
                         Rutas.DETALLE,
                         arguments = listOf(navArgument("ticketId") { type = NavType.IntType })
-                    ) { entrada ->
-                        val ticketId = entrada.arguments?.getInt("ticketId") ?: 0
+                    ) { backStack ->
+                        val ticketId = backStack.arguments?.getInt("ticketId") ?: 0
                         usuario?.let { u ->
                             val vm: TicketDetalleViewModel = viewModel(
                                 factory = AyudaViewModelFactory(repo, prefs, u, ticketId)
@@ -188,7 +201,17 @@ fun NavAyuda(app: AyudaApp) {
                         }
                     }
                     composable(Rutas.PERFIL) {
-                        Pendiente("Perfil (Paso 12)")
+                        usuario?.let { u ->
+                            val ticketsVm: MisTicketsViewModel = viewModel(
+                                factory = AyudaViewModelFactory(repo, prefs, u)
+                            )
+                            PerfilScreen(
+                                sesionVm = sesionVm,
+                                ticketsVm = ticketsVm,
+                                onCambiarPerfil = { cambiarPerfil() },
+                                onCerrarSesion = { cerrarSesion() }
+                            )
+                        }
                     }
                 }
 
@@ -205,8 +228,8 @@ fun NavAyuda(app: AyudaApp) {
                     composable(
                         Rutas.ATENDER,
                         arguments = listOf(navArgument("ticketId") { type = NavType.IntType })
-                    ) { entrada ->
-                        val ticketId = entrada.arguments?.getInt("ticketId") ?: 0
+                    ) { backStack ->
+                        val ticketId = backStack.arguments?.getInt("ticketId") ?: 0
                         usuario?.let { u ->
                             val vm: AtenderViewModel = viewModel(
                                 factory = AyudaViewModelFactory(repo, prefs, u, ticketId)
@@ -228,13 +251,17 @@ fun NavAyuda(app: AyudaApp) {
                             type = NavType.IntType
                             defaultValue = 0
                         })
-                    ) { entrada ->
-                        val id = entrada.arguments?.getInt("id") ?: 0
+                    ) { backStack ->
+                        val id = backStack.arguments?.getInt("id") ?: 0
                         val vm: CategoriasViewModel = viewModel(factory = factory)
                         FormularioCategoriaScreen(vm = vm, id = id, onListo = { nav.popBackStack() })
                     }
                     composable(Rutas.AJUSTES) {
-                        Pendiente("Ajustes (Paso 12)")
+                        AjustesScreen(
+                            sesionVm = sesionVm,
+                            onCambiarPerfil = { cambiarPerfil() },
+                            onCerrarSesion = { cerrarSesion() }
+                        )
                     }
                 }
             }
@@ -274,13 +301,5 @@ private fun BarraInferior(items: List<ItemBarra>, rutaActual: String, onIr: (Str
                 )
             )
         }
-    }
-}
-
-/** Marcador temporal para pantallas que se construyen en pasos siguientes. */
-@Composable
-private fun Pendiente(texto: String) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(texto, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }

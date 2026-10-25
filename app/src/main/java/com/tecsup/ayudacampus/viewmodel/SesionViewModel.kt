@@ -42,8 +42,13 @@ class SesionViewModel(
     private val _inicio = MutableStateFlow<EstadoInicio>(EstadoInicio.Cargando)
     val inicio: StateFlow<EstadoInicio> = _inicio.asStateFlow()
 
+    // Preferencias de DataStore expuestas como StateFlow (Eagerly: se leen desde el inicio).
     val modoOscuro: StateFlow<Boolean> = prefs.modoOscuro
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    val notificaciones: StateFlow<Boolean> = prefs.notificaciones
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
+    val recibirTickets: StateFlow<Boolean> = prefs.recibirTickets
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
     init {
         // Si ya hay un perfil guardado en DataStore, recuperamos al usuario (el Splash salta el login).
@@ -87,5 +92,43 @@ class SesionViewModel(
 
     fun limpiarError() {
         _error.value = null
+    }
+
+    fun guardarModoOscuro(valor: Boolean) {
+        viewModelScope.launch { prefs.guardarModoOscuro(valor) }
+    }
+
+    fun guardarNotificaciones(valor: Boolean) {
+        viewModelScope.launch { prefs.guardarNotificaciones(valor) }
+    }
+
+    fun guardarRecibirTickets(valor: Boolean) {
+        viewModelScope.launch { prefs.guardarRecibirTickets(valor) }
+    }
+
+    /**
+     * Modo practica: pasa al otro perfil (estudiante <-> soporte) sin volver a loguearse.
+     * Guarda el nuevo perfil en DataStore y avisa a la pantalla para que navegue.
+     */
+    fun cambiarPerfil(onCambio: (Rol) -> Unit) {
+        val actual = _usuarioActual.value ?: return
+        val otroRol = if (actual.rol == Rol.CLIENTE.name) Rol.ADMIN else Rol.CLIENTE
+        viewModelScope.launch {
+            val otro = repo.obtenerUsuarioPorRol(otroRol)
+            if (otro == null) {
+                _error.value = "No hay un usuario de ${otroRol.etiqueta} para practicar"
+                return@launch
+            }
+            prefs.guardarSesion(otro.rol, otro.id)
+            _usuarioActual.value = otro
+            onCambio(otroRol)
+        }
+    }
+
+    /** Borra el perfil guardado; la pantalla vuelve al Login. */
+    fun cerrarSesion() {
+        _usuarioActual.value = null
+        _error.value = null
+        viewModelScope.launch { prefs.cerrarSesion() }
     }
 }

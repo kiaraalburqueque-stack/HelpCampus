@@ -125,7 +125,7 @@ fun DetalleTicketScreen(
                 EstadoTicket.RESUELTO -> item {
                     TarjetaCalificar(
                         ticketId = d.ticket.id,
-                        onConfirmar = { estrellas, final -> vm.cerrar(estrellas, final) },
+                        onConfirmar = { estrellas, comentarioFinal -> vm.cerrar(estrellas, comentarioFinal) },
                         onReabrir = vm::reabrir
                     )
                 }
