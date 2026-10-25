@@ -23,6 +23,12 @@ class BandejaViewModel(repo: AyudaRepository) : ViewModel() {
             lista.filter { filtro.acepta(it) }
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    /** Fase 2: SLA de cada ticket de la bandeja (id -> estado), recalculado cada minuto. */
+    val slas: StateFlow<Map<Int, EstadoSla>> =
+        combine(tickets, relojPorMinuto()) { lista, ahora ->
+            lista.associate { it.ticket.id to calcularSla(it.ticket, ahora) }
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
+
     fun cambiarFiltro(f: FiltroEstado) {
         _filtro.value = f
     }

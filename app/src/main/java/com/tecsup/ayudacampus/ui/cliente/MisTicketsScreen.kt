@@ -30,6 +30,7 @@ import com.tecsup.ayudacampus.ui.components.AppTopBar
 import com.tecsup.ayudacampus.ui.components.AyudaTextField
 import com.tecsup.ayudacampus.ui.components.EstadoVacio
 import com.tecsup.ayudacampus.ui.components.FiltrosEstado
+import com.tecsup.ayudacampus.ui.components.IndicadorSla
 import com.tecsup.ayudacampus.ui.components.TicketCard
 import com.tecsup.ayudacampus.viewmodel.MisTicketsViewModel
 
@@ -41,6 +42,7 @@ fun MisTicketsScreen(
     onNuevo: () -> Unit
 ) {
     val tickets by vm.tickets.collectAsState()
+    val slas by vm.slas.collectAsState()
     val resumen by vm.resumen.collectAsState()
     val filtro by vm.filtro.collectAsState()
     val busqueda by vm.busqueda.collectAsState()
@@ -78,6 +80,7 @@ fun MisTicketsScreen(
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     items(tickets, key = { it.ticket.id }) { t ->
+                        val sla = slas[t.ticket.id]
                         TicketCard(
                             titulo = t.ticket.titulo,
                             numero = t.ticket.id,
@@ -86,7 +89,8 @@ fun MisTicketsScreen(
                             estado = EstadoTicket.valueOf(t.ticket.estado),
                             prioridad = Prioridad.valueOf(t.ticket.prioridad),
                             fecha = t.ticket.fecha,
-                            onClick = { onAbrir(t.ticket.id) }
+                            pie = if (sla != null) { { IndicadorSla(sla) } } else null,
+                        onClick = { onAbrir(t.ticket.id) }
                         )
                     }
                 }

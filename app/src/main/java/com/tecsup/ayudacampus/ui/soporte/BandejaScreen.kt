@@ -18,6 +18,7 @@ import com.tecsup.ayudacampus.model.Prioridad
 import com.tecsup.ayudacampus.ui.components.AppTopBar
 import com.tecsup.ayudacampus.ui.components.EstadoVacio
 import com.tecsup.ayudacampus.ui.components.FiltrosEstado
+import com.tecsup.ayudacampus.ui.components.IndicadorSla
 import com.tecsup.ayudacampus.ui.components.TicketCard
 import com.tecsup.ayudacampus.ui.components.nombreCorto
 import com.tecsup.ayudacampus.viewmodel.BandejaViewModel
@@ -25,6 +26,7 @@ import com.tecsup.ayudacampus.viewmodel.BandejaViewModel
 @Composable
 fun BandejaScreen(vm: BandejaViewModel, onAtender: (Int) -> Unit) {
     val tickets by vm.tickets.collectAsState()
+    val slas by vm.slas.collectAsState()
     val filtro by vm.filtro.collectAsState()
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -40,6 +42,7 @@ fun BandejaScreen(vm: BandejaViewModel, onAtender: (Int) -> Unit) {
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 items(tickets, key = { it.ticket.id }) { t ->
+                    val sla = slas[t.ticket.id]
                     TicketCard(
                         titulo = t.ticket.titulo,
                         numero = t.ticket.id,
@@ -48,6 +51,7 @@ fun BandejaScreen(vm: BandejaViewModel, onAtender: (Int) -> Unit) {
                         estado = EstadoTicket.valueOf(t.ticket.estado),
                         prioridad = Prioridad.valueOf(t.ticket.prioridad),
                         fecha = t.ticket.fecha,
+                        pie = if (sla != null) { { IndicadorSla(sla) } } else null,
                         onClick = { onAtender(t.ticket.id) }
                     )
                 }
