@@ -46,6 +46,7 @@ fun CategoriasScreen(
     onNueva: () -> Unit = {}
 ) {
     val categorias by vm.categorias.collectAsState()
+    val conteos by vm.conteos.collectAsState()
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             AppTopBar(titulo = "Categorías", subtitulo = "${categorias.size} categorías")
@@ -57,7 +58,8 @@ fun CategoriasScreen(
                     CategoriaItem(
                         c = c,
                         onToggle = { vm.alternar(c) },
-                        onEditar = { onEditar(c.id) }
+                        onEditar = { onEditar(c.id) },
+                        detalle = "${conteos[c.id] ?: 0} tickets" + if (c.activa) "" else " · Inactiva"
                     )
                 }
             }
