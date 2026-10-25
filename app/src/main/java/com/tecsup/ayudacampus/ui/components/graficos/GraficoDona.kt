@@ -1,5 +1,7 @@
 package com.tecsup.ayudacampus.ui.components.graficos
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -7,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -25,6 +29,10 @@ fun GraficoDona(
     textoCentro: String? = null,
     subtextoCentro: String? = null
 ) {
+    // Los arcos "crecen" desde 0 al aparecer el grafico.
+    val progreso = remember { Animatable(0f) }
+    LaunchedEffect(Unit) { progreso.animateTo(1f, tween(durationMillis = 900)) }
+
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val trazo = grosor.toPx()
@@ -45,7 +53,7 @@ fun GraficoDona(
             } else {
                 var inicio = -90f
                 datos.forEach { dato ->
-                    val barrido = dato.valor / total * 360f
+                    val barrido = dato.valor / total * 360f * progreso.value
                     if (barrido > 0f) {
                         drawArc(
                             color = dato.color,

@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -61,7 +62,7 @@ import com.tecsup.ayudacampus.ui.theme.colorPrioridad
 import com.tecsup.ayudacampus.viewmodel.BandejaViewModel
 import com.tecsup.ayudacampus.viewmodel.CriteriosBusqueda
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun BandejaScreen(vm: BandejaViewModel, onAtender: (Int) -> Unit) {
     val tickets by vm.tickets.collectAsState()
@@ -127,6 +128,7 @@ fun BandejaScreen(vm: BandejaViewModel, onAtender: (Int) -> Unit) {
                 items(tickets, key = { it.ticket.id }) { t ->
                     val sla = slas[t.ticket.id]
                     TicketCard(
+                        modifier = Modifier.animateItem(),
                         titulo = t.ticket.titulo,
                         numero = t.ticket.id,
                         detalle = nombreCorto(t.cliente?.nombre ?: "Estudiante"),

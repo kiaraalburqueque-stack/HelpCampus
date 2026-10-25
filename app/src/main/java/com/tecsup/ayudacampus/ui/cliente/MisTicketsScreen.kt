@@ -1,5 +1,6 @@
 package com.tecsup.ayudacampus.ui.cliente
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,6 +35,7 @@ import com.tecsup.ayudacampus.ui.components.IndicadorSla
 import com.tecsup.ayudacampus.ui.components.TicketCard
 import com.tecsup.ayudacampus.viewmodel.MisTicketsViewModel
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MisTicketsScreen(
     vm: MisTicketsViewModel,
@@ -82,6 +84,7 @@ fun MisTicketsScreen(
                     items(tickets, key = { it.ticket.id }) { t ->
                         val sla = slas[t.ticket.id]
                         TicketCard(
+                            modifier = Modifier.animateItem(),
                             titulo = t.ticket.titulo,
                             numero = t.ticket.id,
                             detalle = t.ticket.ubicacion.ifBlank { t.categoria?.nombre ?: "" },

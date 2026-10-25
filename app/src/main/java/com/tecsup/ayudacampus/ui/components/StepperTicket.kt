@@ -1,5 +1,7 @@
 package com.tecsup.ayudacampus.ui.components
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -18,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,6 +38,12 @@ fun StepperTicket(estado: EstadoTicket, modifier: Modifier = Modifier) {
         pasos.forEachIndexed { i, paso ->
             val hecho = i < actual || (i == actual && estado == EstadoTicket.CERRADO)
             val esActual = i == actual && !hecho
+            // Cuando Soporte cambia el estado, el paso se "enciende" con una transicion de color.
+            val colorLinea by animateColorAsState(
+                if (i < actual) ColorResuelto else MaterialTheme.colorScheme.outline,
+                tween(600),
+                label = "linea"
+            )
             Column(
                 modifier = Modifier.width(64.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -77,9 +86,7 @@ fun StepperTicket(estado: EstadoTicket, modifier: Modifier = Modifier) {
                         .weight(1f)
                         .padding(top = 12.dp)
                         .height(3.dp)
-                        .background(
-                            if (i < actual) ColorResuelto else MaterialTheme.colorScheme.outline
-                        )
+                        .background(colorLinea)
                 )
             }
         }

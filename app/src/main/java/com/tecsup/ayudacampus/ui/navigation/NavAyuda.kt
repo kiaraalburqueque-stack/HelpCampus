@@ -1,5 +1,10 @@
 package com.tecsup.ayudacampus.ui.navigation
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -144,6 +149,11 @@ fun NavAyuda(app: AyudaApp) {
             NavHost(
                 navController = nav,
                 startDestination = Rutas.SPLASH,
+                // Fase 2: transicion suave entre pantallas (aparece y se desliza un poco).
+                enterTransition = { fadeIn(tween(250)) + slideInHorizontally(tween(250)) { it / 10 } },
+                exitTransition = { fadeOut(tween(200)) },
+                popEnterTransition = { fadeIn(tween(250)) },
+                popExitTransition = { fadeOut(tween(200)) + slideOutHorizontally(tween(250)) { it / 10 } },
                 modifier = Modifier
                     .padding(padding)
                     .fillMaxSize()

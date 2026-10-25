@@ -1,5 +1,8 @@
 package com.tecsup.ayudacampus.ui.cliente
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -32,10 +35,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.dp
 import com.tecsup.ayudacampus.data.local.relation.TicketConDetalle
 import com.tecsup.ayudacampus.model.EstadoTicket
@@ -275,7 +280,12 @@ private fun CalificacionRecibida(calificacion: Int) {
         ) {
             Text("Ticket cerrado", style = MaterialTheme.typography.titleSmall)
             Spacer(Modifier.height(6.dp))
-            Estrellas(valor = calificacion, tamano = 28.dp)
+            // Fase 2: pequena celebracion, las estrellas aparecen con un rebote.
+            val escala = remember { Animatable(0.4f) }
+            LaunchedEffect(Unit) {
+                escala.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow))
+            }
+            Estrellas(valor = calificacion, tamano = 28.dp, modifier = Modifier.scale(escala.value))
             Text(
                 "Calificaste la atención con $calificacion de 5",
                 style = MaterialTheme.typography.labelSmall,
